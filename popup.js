@@ -134,6 +134,7 @@ async function renderUI() {
         >
         <div class="habit-name">${habit}</div>
         ${streak > 0 ? `<div class="habit-streak">🔥 ${streak}</div>` : ''}
+        <span class="habit-delete" data-habit="${habit}">✕</span>
       </div>
     `;
   }).join('');
@@ -143,6 +144,16 @@ async function renderUI() {
     checkbox.addEventListener('change', (e) => {
       const habit = e.target.getAttribute('data-habit');
       markHabitComplete(habit, e.target.checked);
+    });
+  });
+
+  // Add event listeners to delete buttons
+  document.querySelectorAll('.habit-delete').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const habit = e.target.getAttribute('data-habit');
+      const { habits, completions } = await getHabits();
+      const filtered = habits.filter(h => h !== habit);
+      chrome.storage.local.set({ habits: filtered, completions }, renderUI);
     });
   });
 
