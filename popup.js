@@ -105,11 +105,13 @@ function renderCalendar(habits, completions) {
   grid.innerHTML = '';
 
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const days = [];
 
+  // Get last 28 days (including today)
   for (let i = 27; i >= 0; i--) {
     const date = new Date(today);
-    date.setDate(date.getDate() - i);
+    date.setDate(today.getDate() - i);
     days.push(date);
   }
 
