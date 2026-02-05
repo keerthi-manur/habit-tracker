@@ -1,11 +1,12 @@
-const DEFAULT_HABITS = ['Yoga', 'Drink Water', 'Read Textbook', 'Eat Healthy'];
+const DEFAULT_HABITS = ['Floss', 'Exercise', 'Meditate', 'Read', 'Drink Water'];
 
 async function getHabits() {
   return new Promise(resolve => {
-    chrome.storage.local.get(['habits', 'completions'], (result) => {
+    chrome.storage.local.get(['habits', 'completions', 'thoughts'], (result) => {
       resolve({
         habits: result.habits || DEFAULT_HABITS,
-        completions: result.completions || {}
+        completions: result.completions || {},
+        thoughts: result.thoughts || []
       });
     });
   });
@@ -53,8 +54,57 @@ function getStreak(habit, completions) {
   return streak;
 }
 
+async function addThought() {
+  const input = document.getElementById('newThoughtInput');
+  const thoughtText = input.value.trim();
+
+  if (!thoughtText) return;
+
+  const { habits, completions, thoughts } = await getHabits();
+  
+  const now = new Date();
+  const thought = {
+    id: Date.now(),
+    text: thoughtText,
+    timestamp: now.toLocaleString(),
+    date: getTodayKey()
+  };
+
+  thoughts.unshift(thought);
+  chrome.storage.local.set({ habits, completions, thoughts }, () => {
+    input.value = '';
+    renderUI();
+  });
+}
+
+function renderThoughts(thoughts) {
+  const thoughtsList = document.getElementById('thoughtsList');
+  
+  if (thoughts.length === 0) {
+    thoughtsList.innerHTML = '<p style="color: #999; font-size: 13px; text-align: center;">No thoughts yet. Start capturing!</p>';
+    return;
+  }
+
+  thoughtsList.innerHTML = thoughts.slice(0, 10).map(thought => `
+    <div class="thought-item">
+      <span class="thought-delete" data-id="${thought.id}">✕</span>
+      <div>${thought.text}</div>
+      <div class="thought-time">${thought.timestamp}</div>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.thought-delete').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const id = parseInt(e.target.getAttribute('data-id'));
+      const { habits, completions, thoughts } = await getHabits();
+      const filtered = thoughts.filter(t => t.id !== id);
+      chrome.storage.local.set({ habits, completions, thoughts: filtered }, renderUI);
+    });
+  });
+}
+
 async function renderUI() {
-  const { habits, completions } = await getHabits();
+  const { habits, completions, thoughts } = await getHabits();
   const today = getTodayKey();
   const todayCompletions = completions[today] || [];
 
@@ -95,6 +145,9 @@ async function renderUI() {
       markHabitComplete(habit, e.target.checked);
     });
   });
+
+  // Render thoughts
+  renderThoughts(thoughts);
 
   // Render calendar
   renderCalendar(habits, completions);
@@ -177,6 +230,12 @@ document.querySelectorAll('.tab').forEach(tab => {
 document.getElementById('addHabitBtn').addEventListener('click', addHabit);
 document.getElementById('newHabitInput').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') addHabit();
+});
+
+// Add thought button
+document.getElementById('addThoughtBtn').addEventListener('click', addThought);
+document.getElementById('newThoughtInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') addThought();
 });
 
 // Initial render

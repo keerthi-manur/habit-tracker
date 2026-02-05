@@ -227,6 +227,34 @@
       color: #667eea;
     }
 
+    .thought-item {
+      background: #f8f9fa;
+      border-left: 3px solid #667eea;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .thought-time {
+      font-size: 11px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    .thought-delete {
+      float: right;
+      cursor: pointer;
+      color: #ccc;
+      font-size: 12px;
+      padding: 2px 6px;
+    }
+
+    .thought-delete:hover {
+      color: #ff6b6b;
+    }
+
     .tab-content {
       display: none;
     }
@@ -258,6 +286,7 @@
     <div class="habits-section">
       <div class="tabs">
         <button class="tab active" data-tab="today">Today</button>
+        <button class="tab" data-tab="thoughts">Thoughts</button>
         <button class="tab" data-tab="calendar">Calendar</button>
       </div>
 
@@ -274,6 +303,20 @@
           >
           <button id="addHabitBtn">Add</button>
         </div>
+      </div>
+
+      <div id="thoughts" class="tab-content">
+        <p class="section-title">Thoughts</p>
+        <div class="add-habit">
+          <input 
+            id="newThoughtInput" 
+            type="text" 
+            placeholder="What's on your mind?"
+            maxlength="200"
+          >
+          <button id="addThoughtBtn">Capture</button>
+        </div>
+        <div id="thoughtsList" style="margin-top: 12px; max-height: 200px; overflow-y: auto;"></div>
       </div>
 
       <div id="calendar" class="tab-content">
