@@ -7,6 +7,6 @@
   "action": {
     "default_popup": "popup.html",
     "default_title": "Micro Habit Tracker",
-    "default_icon": "icon.jpg"
+    "default_icon": "icon.png"
   }
 }
