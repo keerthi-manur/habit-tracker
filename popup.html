@@ -268,6 +268,38 @@
       color: #ff6b6b;
     }
 
+    .reminder-item {
+      background: #f0f4ff;
+      border-left: 3px solid #667eea;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .reminder-text {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .reminder-time {
+      font-size: 11px;
+      color: #667eea;
+      margin-bottom: 6px;
+    }
+
+    .reminder-delete {
+      float: right;
+      cursor: pointer;
+      color: #ccc;
+      font-size: 12px;
+      padding: 2px 6px;
+    }
+
+    .reminder-delete:hover {
+      color: #ff6b6b;
+    }
+
     .tab-content {
       display: none;
     }
@@ -300,6 +332,7 @@
       <div class="tabs">
         <button class="tab active" data-tab="today">Today</button>
         <button class="tab" data-tab="thoughts">Thoughts</button>
+        <button class="tab" data-tab="reminders">Reminders</button>
         <button class="tab" data-tab="calendar">Calendar</button>
       </div>
 
@@ -330,6 +363,28 @@
           <button id="addThoughtBtn">Capture</button>
         </div>
         <div id="thoughtsList" style="margin-top: 12px; max-height: 200px; overflow-y: auto;"></div>
+      </div>
+
+      <div id="reminders" class="tab-content">
+        <p class="section-title">Set Reminder</p>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <input 
+            id="reminderText" 
+            type="text" 
+            placeholder="What should I remember?"
+            maxlength="150"
+            style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; font-family: inherit;"
+          >
+          <input 
+            id="reminderTime" 
+            type="time"
+            style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; font-family: inherit;"
+          >
+          <button id="setReminderBtn" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;">Set Reminder</button>
+        </div>
+
+        <p class="section-title" style="margin-top: 16px;">Active Reminders</p>
+        <div id="remindersList" style="max-height: 250px; overflow-y: auto;"></div>
       </div>
 
       <div id="calendar" class="tab-content">

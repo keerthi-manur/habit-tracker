@@ -3,7 +3,7 @@
   "name": "Micro Habit Tracker",
   "version": "1.0",
   "description": "Track daily habits",
-  "permissions": ["storage"],
+  "permissions": ["storage", "notifications"],
   "action": {
     "default_popup": "popup.html",
     "default_title": "Micro Habit Tracker",

@@ -2,11 +2,12 @@ const DEFAULT_HABITS = ['Floss', 'Exercise', 'Meditate', 'Read', 'Drink Water'];
 
 async function getHabits() {
   return new Promise(resolve => {
-    chrome.storage.local.get(['habits', 'completions', 'thoughts'], (result) => {
+    chrome.storage.local.get(['habits', 'completions', 'thoughts', 'reminders'], (result) => {
       resolve({
         habits: result.habits || DEFAULT_HABITS,
         completions: result.completions || {},
-        thoughts: result.thoughts || []
+        thoughts: result.thoughts || [],
+        reminders: result.reminders || []
       });
     });
   });
@@ -96,15 +97,90 @@ function renderThoughts(thoughts) {
   document.querySelectorAll('.thought-delete').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       const id = parseInt(e.target.getAttribute('data-id'));
-      const { habits, completions, thoughts } = await getHabits();
+      const { habits, completions, thoughts, reminders } = await getHabits();
       const filtered = thoughts.filter(t => t.id !== id);
-      chrome.storage.local.set({ habits, completions, thoughts: filtered }, renderUI);
+      chrome.storage.local.set({ habits, completions, thoughts: filtered, reminders }, renderUI);
     });
   });
 }
 
+async function addReminder() {
+  const text = document.getElementById('reminderText').value.trim();
+  const time = document.getElementById('reminderTime').value;
+
+  if (!text || !time) {
+    alert('Please enter both text and time');
+    return;
+  }
+
+  const { habits, completions, thoughts, reminders } = await getHabits();
+  
+  const reminder = {
+    id: Date.now(),
+    text: text,
+    time: time,
+    createdAt: new Date().toLocaleString()
+  };
+
+  reminders.push(reminder);
+  chrome.storage.local.set({ habits, completions, thoughts, reminders }, () => {
+    document.getElementById('reminderText').value = '';
+    document.getElementById('reminderTime').value = '';
+    renderUI();
+    scheduleReminder(reminder);
+  });
+}
+
+function renderReminders(reminders) {
+  const remindersList = document.getElementById('remindersList');
+  
+  if (reminders.length === 0) {
+    remindersList.innerHTML = '<p style="color: #999; font-size: 13px; text-align: center;">No reminders set. Create one above!</p>';
+    return;
+  }
+
+  remindersList.innerHTML = reminders.map(reminder => `
+    <div class="reminder-item">
+      <span class="reminder-delete" data-id="${reminder.id}">✕</span>
+      <div class="reminder-text">${reminder.text}</div>
+      <div class="reminder-time">⏰ ${reminder.time}</div>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.reminder-delete').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const id = parseInt(e.target.getAttribute('data-id'));
+      const { habits, completions, thoughts, reminders } = await getHabits();
+      const filtered = reminders.filter(r => r.id !== id);
+      chrome.storage.local.set({ habits, completions, thoughts, reminders: filtered }, renderUI);
+    });
+  });
+}
+
+function scheduleReminder(reminder) {
+  const [hours, minutes] = reminder.time.split(':').map(Number);
+  const now = new Date();
+  const reminderDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+  
+  if (reminderDate < now) {
+    reminderDate.setDate(reminderDate.getDate() + 1);
+  }
+
+  const delay = reminderDate - now;
+
+  setTimeout(() => {
+    chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="75">📌</text></svg>',
+      title: 'Reminder',
+      message: reminder.text,
+      priority: 2
+    }).catch(err => console.log('Notification error:', err));
+  }, delay);
+}
+
 async function renderUI() {
-  const { habits, completions, thoughts } = await getHabits();
+  const { habits, completions, thoughts, reminders } = await getHabits();
   const today = getTodayKey();
   const todayCompletions = completions[today] || [];
 
@@ -151,14 +227,17 @@ async function renderUI() {
   document.querySelectorAll('.habit-delete').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       const habit = e.target.getAttribute('data-habit');
-      const { habits, completions } = await getHabits();
+      const { habits, completions, thoughts, reminders } = await getHabits();
       const filtered = habits.filter(h => h !== habit);
-      chrome.storage.local.set({ habits: filtered, completions }, renderUI);
+      chrome.storage.local.set({ habits: filtered, completions, thoughts, reminders }, renderUI);
     });
   });
 
   // Render thoughts
   renderThoughts(thoughts);
+
+  // Render reminders
+  renderReminders(reminders);
 
   // Render calendar
   renderCalendar(habits, completions);
@@ -247,6 +326,12 @@ document.getElementById('newHabitInput').addEventListener('keypress', (e) => {
 document.getElementById('addThoughtBtn').addEventListener('click', addThought);
 document.getElementById('newThoughtInput').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') addThought();
+});
+
+// Add reminder button
+document.getElementById('setReminderBtn').addEventListener('click', addReminder);
+document.getElementById('reminderText').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') addReminder();
 });
 
 // Initial render
