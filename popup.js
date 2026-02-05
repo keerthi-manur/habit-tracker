@@ -106,12 +106,20 @@ function renderCalendar(habits, completions) {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  
+  // Calculate start date (28 days ago, but start on Sunday of that week)
+  const startDate = new Date(today);
+  startDate.setDate(today.getDate() - 27);
+  
+  // Find the Sunday of the week containing startDate
+  const dayOfWeek = startDate.getDay();
+  startDate.setDate(startDate.getDate() - dayOfWeek);
+  
+  // Generate 35 days (5 weeks) to fill the calendar grid properly
   const days = [];
-
-  // Get last 28 days (including today)
-  for (let i = 27; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(today.getDate() - i);
+  for (let i = 0; i < 35; i++) {
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + i);
     days.push(date);
   }
 
