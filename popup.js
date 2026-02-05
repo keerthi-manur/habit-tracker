@@ -127,7 +127,6 @@ async function addReminder() {
     document.getElementById('reminderText').value = '';
     document.getElementById('reminderTime').value = '';
     renderUI();
-    scheduleReminder(reminder);
   });
 }
 
@@ -169,13 +168,21 @@ function scheduleReminder(reminder) {
   const delay = reminderDate - now;
 
   setTimeout(() => {
-    chrome.notifications.create({
-      type: 'basic',
-      iconUrl: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="75">📌</text></svg>',
-      title: 'Reminder',
-      message: reminder.text,
-      priority: 2
-    }).catch(err => console.log('Notification error:', err));
+    // Use alert as fallback
+    alert(`⏰ Reminder: ${reminder.text}`);
+    
+    // Try chrome.notifications as backup
+    try {
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="75">📌</text></svg>',
+        title: 'Reminder',
+        message: reminder.text,
+        priority: 2
+      });
+    } catch (e) {
+      console.log('Notification not available');
+    }
   }, delay);
 }
 
