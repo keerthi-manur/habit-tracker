@@ -1,4 +1,4 @@
-const DEFAULT_HABITS = ['Floss', 'Exercise', 'Meditate', 'Read', 'Drink Water'];
+const DEFAULT_HABITS = ['Yoga', 'Drink Water', 'Read Textbook', 'Eat Healthy'];
 
 async function getHabits() {
   return new Promise(resolve => {
